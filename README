@@ -1,3 +1,10 @@
+Fork da Aprimorar: aprimorar.net.br
+Edições feitas por Lucas Elias Freiberger.
+Adiciona .bat para instalar módulos e outro para chamar o script (para ser chamado no agendador de tarefas do windows).
+Adicionado também possibilidade de escolher pasta no FTP.
+
+Desabilitada remoção de arquivos antivos, eventualmente isso pode ser habilitado conforme necessidade.
+==
 Zip to Backup - Johann du Toit v0.0.1
 =======================
 
