@@ -26,12 +26,12 @@ https://github.com/Johanndutoit/Zip-to-FTP-Backup
 import zipfile, os, sys
 import datetime
 import io
-import ConfigParser
+import configparser
 import shutil
 import ftplib
 import datetime
  
-config = ConfigParser.RawConfigParser(allow_no_value=True)
+config = configparser.RawConfigParser(allow_no_value=True)
 config.read('backupcfg.ini')
 
 """
@@ -81,46 +81,47 @@ def dirEntries(dir_name, subdir, *args):
     return fileList
 	
 if __name__ == '__main__':
-	print "ZIP to FTP Backup Tool"
-	print "v0.0.1 - Johann du Toit"
-	print "----------"
+	print ("ZIP to FTP Backup Tool")
+	print ("v0.0.1 - Johann du Toit")
+	print ("----------")
 
 	filelistings = [] # All Files that will be added to the Archive
 
-	print "\n====="
+	print ("\n=====")
 	# Add Files From Locations
 	for folder in config.options("folders"):
-			print "Scanning " + str(folder.strip())
+			print ("Scanning " + str(folder.strip()))
 			for fi in dirEntries(folder.strip(' \t\n\r'), True):
 					if "WHAT IS TRANSFER.txt" not in fi:
 							filelistings.append(fi)
-	print "=====\n"
+	print ("=====\n")
 
 	now = datetime.datetime.now()
-	zipname = r'shaka.' + now.strftime("%d.%m.%Y") + '.zip'
+	zipname = r'backup-' + now.strftime("%d-%m-%Y") + '.zip'
 
-	print "\n====="
-	print "Add Backup to a ZIP File"
+	print ("\n=====")
+	print ("Add Backup to a ZIP File")
 	makeArchive(filelistings, zipname)
-	print "Backup was Zipped"
-	print "=====\n"
+	print ("Backup was Zipped")
+	print ("=====\n")
 
-	print "\n====="
-	print "Connecting to FTP Server..."
+	print ("\n=====")
+	print ("Connecting to FTP Server...")
 
 	ftp = ftplib.FTP(config.get("ftp", 'host'))
 	
-	print "Logging in..."
+	print ("Logging in...")
 	
 	ftp.login(config.get("ftp", 'username'), config.get("ftp", 'password'))
+	#ftp.sendcmd("cd "+config.get("ftp", 'folder'))
 
-	print "Getting Directory Listing..."
+	print ("Getting Directory Listing...")
 	
 	files = ftp.nlst()
 	
-	print "Found " + str(len(files)) + " files"
+	print ("Found " + str(len(files)) + " files")
 	
-	print "Removing Stale Backups older than " + str(config.get("ftp", 'keep_for_months').strip()) + " Month(s)"
+	print ("Removing Stale Backups older than " + str(config.get("ftp", 'keep_for_months').strip()) + " Month(s)")
 	
 	count_deleted = 0
 	months_from_now = int((datetime.date.today() + datetime.timedelta( ( int(config.get("ftp", 'keep_for_months').strip()) *365) / 12 )).strftime("%m"))
@@ -139,26 +140,26 @@ if __name__ == '__main__':
 					count_deleted = count_deleted + 1
 					
 					try:
-						print "Removing Backup " + str(file) + " it's " + str(date_month_diff) + " Month(s) Old"
-						ftp.delete(file)
+						print ("Removing Backup " + str(file) + " it's " + str(date_month_diff) + " Month(s) Old")
+						#ftp.delete(file)
 					except:
 						pass
 	
-	print "Removed " + str(count_deleted) + " Backups"
+	print ("Removed " + str(count_deleted) + " Backups")
 	
-	print "Uploading Backup Zip..."
+	print ("Uploading Backup Zip...")
 	
 	try:
-		ftp.storbinary('STOR ' + zipname, open(zipname, 'rb'))
+		ftp.storbinary('STOR ' + config.get("ftp", 'folder')+"/"+zipname, open(zipname, 'rb'))
 	except:
 		pass
 	
-	print "Closing Connection..."
+	print ("Closing Connection...")
 	
 	ftp.close()
 	
-	print "Deleting Backup ZIP"
+	print ("Deleting Backup ZIP")
 	os.remove(zipname)
 	
-	print "=====\n"
+	print ("=====\n")
  
